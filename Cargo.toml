@@ -1,0 +1,39 @@
+[workspace]
+members = [
+    "crate/*",
+    "webapp",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+authors = ["Azriel Hoh <azriel91@gmail.com>"]
+edition = "2021"
+homepage = "https://azriel.im/tears"
+repository = "https://github.com/azriel91/tears"
+readme = "README.md"
+categories = ["asynchronous", "config"]
+keywords = ["automation"]
+license = "MIT OR Apache-2.0"
+
+[workspace.lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(coverage_nightly)'] }
+
+[workspace.dependencies]
+# workspace crates
+tears = { path = "crate/tears", version = "0.1.0" }
+
+# external crates
+axum = "0.7"
+console_error_panic_hook = "0.1"
+http = "1"
+leptos = "0.7.0"
+leptos_axum = "0.7.0"
+leptos_dom = "0.7.0"
+leptos_meta = "0.7.0"
+leptos_router = "0.7.0"
+thiserror = "1"
+tokio = "1"
+tower = "0.4"
+tower-http = "0.5"
+wasm-bindgen = "=0.2.99"
