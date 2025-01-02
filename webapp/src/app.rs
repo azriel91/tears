@@ -40,7 +40,7 @@ const PAGE_CLASSES: &str = "\
     bg-slate-950 \
     text-slate-100 \
     \
-    h-dvh \
+    min-h-dvh \
     w-dvw \
     p-8 \
     \
@@ -73,31 +73,22 @@ const MAIN_CLASSES: &str = "\
     *:grow \
 ";
 
-/// Alternatively:
-///
-/// ```rust,ignore
-/// const HOMEPAGE_CLASSES: &str = "\
-///     gap-4 \
-///     grid \
-///     grid-cols-1 \
-///     lg:grid-cols-2 \
-/// ";
-/// ```
 const HOMEPAGE_CLASSES: &str = "\
     gap-4 \
     flex \
-    flex-col \
-    lg:flex-row \
-    lg:justify-center \
-    lg:flex-wrap \
-    lg:*:grow \
-    lg:*:flex-1 \
-    lg:max-w-[80%] \
+    flex-row \
+    justify-center \
+    flex-wrap \
+    *:grow \
+    *:flex-auto \
+    max-w-[80%] \
 ";
 
 const INPUTS_DIV_CLASSES: &str = "\
     bg-slate-900 \
     rounded-lg \
+    w-2/5 \
+    min-w-min \
     p-8 \
     first:pt-4 \
     divide-y \
@@ -138,8 +129,8 @@ const DESCRIPTION_CLASSES: &str = "\
 ";
 
 const RADIO_WRAPPER_CLASSES: &str = "\
-    inline-block \
-    w-fit \
+    block \
+    w-max \
     rounded-lg \
     ring-offset-4 \
     ring-offset-slate-950 \
@@ -185,6 +176,7 @@ const SUGGESTION_DIV_CLASSES: &str = "\
     bg-slate-800 \
     text-slate-100 \
     \
+    w-2/5 \
     min-h-40 \
     p-4 \
     rounded-lg \

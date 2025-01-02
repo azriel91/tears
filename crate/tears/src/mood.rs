@@ -23,7 +23,7 @@ pub enum Mood {
 
 impl Mood {
     /// Returns an iterator over all variants of this `Mood` enum.
-    pub fn iter() -> impl Iterator<Item = Mood> {
+    pub fn iter() -> impl ExactSizeIterator<Item = Mood> {
         [
             Mood::_01_Anguished,
             Mood::_02_Closed,
