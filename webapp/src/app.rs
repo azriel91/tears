@@ -67,6 +67,14 @@ const NAV_SPACER_CLASSES: &str = "\
     grow \
 ";
 
+const SKIP_TO_CONTENT_CLASSES: &str = "\
+    opacity-0 \
+    pointer-events-none \
+    has-[:focus]:opacity-100 \
+    has-[:focus]:pointer-events-auto \
+    text-sm \
+";
+
 const MAIN_CLASSES: &str = "\
     flex \
     justify-center \
@@ -213,15 +221,23 @@ pub fn App() -> impl IntoView {
                 <div class="routing-progress">
                     <RoutingProgress is_routing max_time=Duration::from_millis(250)/>
                 </div>
+                <div class=SKIP_TO_CONTENT_CLASSES>
+                    <a
+                        href="#main"
+                        onclick=r#"document.querySelector("input").focus();"#
+                    >"Skip to content"</a>
+                </div>
                 <nav class=NAV_CLASSES>
                     <h1 class=H1_CLASSES>"💧 tears"</h1>
                     <div class=NAV_SPACER_CLASSES />
                     <A
                         href="https://github.com/azriel91/tears"
                         target="_blank"
-                    >"🐙 github"</A>
+                    >
+                        "🐙 github"
+                    </A>
                 </nav>
-                <main class=MAIN_CLASSES>
+                <main id="main" class=MAIN_CLASSES>
                     <Routes fallback=RouterFallback>
                         <Route path=StaticSegment(site_prefix) view=HomePage />
                     </Routes>
