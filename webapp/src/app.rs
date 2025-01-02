@@ -1,13 +1,7 @@
-use std::{
-    collections::HashMap,
-    hash::{DefaultHasher, Hash, Hasher},
-    str::FromStr,
-    time::Duration,
-};
+use std::{collections::HashMap, str::FromStr, time::Duration};
 
 use leptos::{
     component,
-    control_flow::For,
     either::Either,
     hydration::{AutoReload, HydrationScripts},
     prelude::{
@@ -54,13 +48,14 @@ const PAGE_CLASSES: &str = "\
     flex-col \
     justify-start \
     \
-    text-lg \
+    text-2xl \
+    leading-relaxed \
 ";
 
 const H1_CLASSES: &str = "\
     font-bold \
     font-mono \
-    text-4xl \
+    text-5xl \
 ";
 
 const NAV_CLASSES: &str = "\
@@ -73,6 +68,9 @@ const NAV_SPACER_CLASSES: &str = "\
 ";
 
 const MAIN_CLASSES: &str = "\
+    flex \
+    justify-center \
+    *:grow \
 ";
 
 /// Alternatively:
@@ -94,6 +92,7 @@ const HOMEPAGE_CLASSES: &str = "\
     lg:flex-wrap \
     lg:*:grow \
     lg:*:flex-1 \
+    lg:max-w-[80%] \
 ";
 
 const INPUTS_DIV_CLASSES: &str = "\
@@ -102,6 +101,7 @@ const INPUTS_DIV_CLASSES: &str = "\
     p-8 \
     first:pt-4 \
     divide-y \
+    divide-slate-700 \
 ";
 
 const INPUT_PANEL_CLASSES: &str = "\
@@ -115,7 +115,7 @@ const FIELD_CLASSES: &str = "\
 const FIELD_NAME_CLASSES: &str = "\
     pr-4 \
     font-bold \
-    text-2xl \
+    text-3xl \
 ";
 
 const FIELD_DESC_CLASSES: &str = "\
@@ -123,29 +123,18 @@ const FIELD_DESC_CLASSES: &str = "\
 
 const DESCRIPTION_LABEL_CLASSES: &str = "\
     font-bold \
-    py-2 \
+    py-3 \
 ";
 
 const DESCRIPTION_CLASSES: &str = "\
-    py-2 \
+    py-3 \
 ";
 
-const TRUST_LI_CLASSES: &str = "\
-    pb-4 \
-";
-
-const RADIO_NAME_CLASSES: &str = "\
-    inline-block \
-    w-20 \
-    px-2 \
-    font-bold \
-";
-
-const MOOD_WRAPPER_CLASSES: &str = "\
+const RADIO_WRAPPER_CLASSES: &str = "\
     inline-block \
     w-fit \
     rounded-lg \
-    ring-offset-2 \
+    ring-offset-4 \
     ring-offset-slate-950 \
     has-[:focus]:ring-2 \
     has-[:active]:ring-2 \
@@ -153,12 +142,13 @@ const MOOD_WRAPPER_CLASSES: &str = "\
     has-[:active]:ring-blue-500 \
 ";
 
-const MOOD_RADIO_CLASSES: &str = "\
+const RADIO_INPUT_CLASSES: &str = "\
     appearance-none \
     focus-visible:outline-none \
+    checked:before:content-['🔵']
 ";
 
-const MOOD_LABEL_CLASSES: &str = "\
+const RADIO_LABEL_CLASSES: &str = "\
     inline-block \
     w-36 \
     py-1 \
@@ -172,8 +162,8 @@ const MOOD_LABEL_CLASSES: &str = "\
     \
     border \
     has-[:checked]:bg-slate-400 \
-    has-[:checked]:border-slate-600 \
     text-slate-700 \
+    has-[:checked]:text-slate-900 \
     \
     first-of-type:rounded-s-lg \
     last-of-type:rounded-e-lg \
@@ -439,34 +429,48 @@ fn TrustInput(trust: RwSignal<Option<Trust>>) -> impl IntoView {
                 <span class=FIELD_NAME_CLASSES>"Trust"</span>
                 <span class=FIELD_DESC_CLASSES>"Whether the person trusts you."</span>
             </p>
-            <ul>
-                <li class=TRUST_LI_CLASSES>
-                    <label for="trust_radio_absent">
-                        <input
-                            type="radio"
-                            name="trust_radio"
-                            id="trust_radio_absent"
-                            on:input=trust_on_input
-                            prop:value=Trust::Absent.to_string()
-                        />
-                        <span class=RADIO_NAME_CLASSES>{Trust::Absent.to_string()}</span>
-                        <span class=DESCRIPTION_CLASSES>"The person has not initiated a conversation with me recently."</span>
-                    </label>
-                </li>
-                <li class=TRUST_LI_CLASSES>
-                    <label for="trust_radio_present">
-                        <input
-                            type="radio"
-                            name="trust_radio"
-                            id="trust_radio_present"
-                            on:input=trust_on_input
-                            prop:value=Trust::Present.to_string()
-                        />
-                        <span class=RADIO_NAME_CLASSES>{Trust::Present.to_string()}</span>
-                        <span class=DESCRIPTION_CLASSES>"The person has initiated a conversation with me recently, with no obligation."</span>
-                    </label>
-                </li>
-            </ul>
+            <div class=RADIO_WRAPPER_CLASSES>
+                {
+                    Trust::iter()
+                        .map(|trust| {
+                            let trust_radio_id = format!("trust_radio_{trust}");
+
+                            view! {
+                                <label
+                                    for=trust_radio_id.clone()
+                                    class=RADIO_LABEL_CLASSES
+                                >
+                                    <input
+                                        type="radio"
+                                        class=RADIO_INPUT_CLASSES
+                                        name="trust_radio"
+                                        id=trust_radio_id.clone()
+                                        on:input=trust_on_input
+                                        prop:value=move || trust.to_string()
+                                    />
+                                    <br />
+                                    <span>{trust.to_string()}</span>
+                                </label>
+                            }
+                        })
+                        .collect_view()
+                }
+            </div>
+            { move || {
+                let trust = trust.get();
+                match trust {
+                    Some(trust) => {
+                        Either::Left(view! {
+                            <p class=DESCRIPTION_CLASSES>
+                                <span class=DESCRIPTION_LABEL_CLASSES>"Indicators:"</span>
+                                <br />
+                                {trust.description()}
+                            </p>
+                        })
+                    }
+                    None => Either::Right(view! {})
+                }
+            }}
         </div>
     }
 }
@@ -482,7 +486,7 @@ fn MoodInput(mood: RwSignal<Option<Mood>>) -> impl IntoView {
                 <span class=FIELD_NAME_CLASSES>"Mood"</span>
                 <span class=FIELD_DESC_CLASSES>"How the person feels."</span>
             </p>
-            <div class=MOOD_WRAPPER_CLASSES>
+            <div class=RADIO_WRAPPER_CLASSES>
                 {
                     Mood::iter()
                         .map(|mood| {
@@ -492,16 +496,17 @@ fn MoodInput(mood: RwSignal<Option<Mood>>) -> impl IntoView {
                             view! {
                                 <label
                                     for=mood_radio_id.clone()
-                                    class=MOOD_LABEL_CLASSES
+                                    class=RADIO_LABEL_CLASSES
                                 >
                                     <input
                                         type="radio"
-                                        class=MOOD_RADIO_CLASSES
+                                        class=RADIO_INPUT_CLASSES
                                         name="mood_radio"
                                         id=mood_radio_id.clone()
                                         on:input=mood_on_input
                                         prop:value=move || mood.to_string()
                                     />
+                                    <br />
                                     <span>
                                         {rank.to_string()}
                                         <br />
@@ -519,10 +524,15 @@ fn MoodInput(mood: RwSignal<Option<Mood>>) -> impl IntoView {
                     Some(mood) => {
                         Either::Left(view! {
                             <p class=DESCRIPTION_CLASSES>
-                                <span class=DESCRIPTION_LABEL_CLASSES>"Symptoms: "</span>
+                                <span class=DESCRIPTION_LABEL_CLASSES>"Symptoms:"</span>
+                                <br />
                                 {mood.symptoms()}
                             </p>
-                            <p class=DESCRIPTION_CLASSES>{mood.summary()}</p>
+                            <p class=DESCRIPTION_CLASSES>
+                                <span class=DESCRIPTION_LABEL_CLASSES>"Description:"</span>
+                                <br />
+                                {mood.summary()}
+                            </p>
                             <p class=DESCRIPTION_CLASSES>{mood.description()}</p>
                         })
                     }
@@ -550,19 +560,16 @@ fn SuggestionDiv(suggestion: Signal<Option<Suggestion>>) -> impl IntoView {
                         Either::Left(view! {
                             <div>
                                 <p class=DESCRIPTION_CLASSES>
-                                    <span class=DESCRIPTION_LABEL_CLASSES>"Action: "</span>
+                                    <span class=DESCRIPTION_LABEL_CLASSES>"Action:"</span>
+                                    <br />
                                     {suggestion.action().to_string()}
                                 </p>
-                                <For
-                                    each=move || {
-                                        suggestion.description()
-                                            .split("\n\n")
-                                            .map(ToString::to_string)
-                                            .collect::<Vec<_>>()
-                                    }
-                                    key=string_hash
-                                    children=|line: String| view! { <p class=DESCRIPTION_CLASSES>{line.to_string()}</p> }
-                                />
+                                {
+                                    suggestion.description()
+                                        .split("\n\n")
+                                        .map(|line| view! { <p class=DESCRIPTION_CLASSES>{line.to_string()}</p> })
+                                        .collect_view()
+                                }
                             </div>
                         })
                     }
@@ -577,10 +584,4 @@ fn SuggestionDiv(suggestion: Signal<Option<Suggestion>>) -> impl IntoView {
             }}
         </div>
     }
-}
-
-fn string_hash(s: &String) -> u64 {
-    let mut hasher = DefaultHasher::new();
-    s.hash(&mut hasher);
-    hasher.finish()
 }

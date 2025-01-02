@@ -15,6 +15,22 @@ pub enum Trust {
     Present,
 }
 
+impl Trust {
+    /// Returns an iterator over all variants of this `Trust` enum.
+    pub fn iter() -> impl Iterator<Item = Trust> {
+        [Trust::Absent, Trust::Present].into_iter()
+    }
+
+    pub fn description(self) -> &'static str {
+        match self {
+            Trust::Absent => "The person has not initiated a conversation with you recently.",
+            Trust::Present => {
+                "The person has initiated a conversation with you recently, with no obligation."
+            }
+        }
+    }
+}
+
 impl Display for Trust {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
