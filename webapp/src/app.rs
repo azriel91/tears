@@ -81,7 +81,6 @@ const HOMEPAGE_CLASSES: &str = "\
     flex-wrap \
     *:grow \
     *:flex-auto \
-    max-w-[80%] \
 ";
 
 const INPUTS_DIV_CLASSES: &str = "\
