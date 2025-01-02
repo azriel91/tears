@@ -22,6 +22,19 @@ pub enum Mood {
 }
 
 impl Mood {
+    /// Returns an iterator over all variants of this `Mood` enum.
+    pub fn iter() -> impl Iterator<Item = Mood> {
+        [
+            Mood::_01_Anguished,
+            Mood::_02_Closed,
+            Mood::_03_Cautious,
+            Mood::_04_Unsettled,
+            Mood::_05_Calm,
+            Mood::_06_Hopeful,
+        ]
+        .into_iter()
+    }
+
     /// Returns the number that this mood would fit on a scale of 1 to 10.
     ///
     /// Notably the variants don't actually reach 10, because this application's

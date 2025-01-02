@@ -11,8 +11,9 @@ use leptos::{
     either::Either,
     hydration::{AutoReload, HydrationScripts},
     prelude::{
-        event_target_value, signal, ClassAttribute, ElementChild, Get, GlobalAttributes, IntoView,
-        LeptosOptions, OnAttribute, PropAttribute, RwSignal, Signal, Write,
+        event_target_value, signal, ClassAttribute, CollectView, ElementChild, Get,
+        GlobalAttributes, IntoView, LeptosOptions, OnAttribute, PropAttribute, RwSignal, Signal,
+        Write,
     },
     view,
 };
@@ -42,7 +43,7 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 }
 
 const PAGE_CLASSES: &str = "\
-    bg-slate-900 \
+    bg-slate-950 \
     text-slate-100 \
     \
     h-dvh \
@@ -72,18 +73,43 @@ const NAV_SPACER_CLASSES: &str = "\
 ";
 
 const MAIN_CLASSES: &str = "\
-    flex \
-    justify-center \
 ";
 
+/// Alternatively:
+///
+/// ```rust,ignore
+/// const HOMEPAGE_CLASSES: &str = "\
+///     gap-4 \
+///     grid \
+///     grid-cols-1 \
+///     lg:grid-cols-2 \
+/// ";
+/// ```
 const HOMEPAGE_CLASSES: &str = "\
-    h-full \
-    w-full \
-    lg:max-w-7xl \
+    gap-4 \
+    flex \
+    flex-col \
+    lg:flex-row \
+    lg:justify-center \
+    lg:flex-wrap \
+    lg:*:grow \
+    lg:*:flex-1 \
+";
+
+const INPUTS_DIV_CLASSES: &str = "\
+    bg-slate-900 \
+    rounded-lg \
+    p-8 \
+    first:pt-4 \
+    divide-y \
+";
+
+const INPUT_PANEL_CLASSES: &str = "\
+    py-4 \
 ";
 
 const FIELD_CLASSES: &str = "\
-    my-4 \
+    mb-4 \
 ";
 
 const FIELD_NAME_CLASSES: &str = "\
@@ -108,27 +134,55 @@ const TRUST_LI_CLASSES: &str = "\
     pb-4 \
 ";
 
-const TRUST_LEVEL_CLASSES: &str = "\
+const RADIO_NAME_CLASSES: &str = "\
     inline-block \
     w-20 \
     px-2 \
     font-bold \
 ";
 
-const MOOD_RANGE_CLASSES: &str = "\
+const MOOD_WRAPPER_CLASSES: &str = "\
+    inline-block \
+    w-fit \
+    rounded-lg \
+    ring-offset-2 \
+    ring-offset-slate-950 \
+    has-[:focus]:ring-2 \
+    has-[:active]:ring-2 \
+    has-[:focus]:ring-blue-500 \
+    has-[:active]:ring-blue-500 \
 ";
 
-const MOOD_RANGE_DESC_CLASSES: &str = "\
-    pb-2
+const MOOD_RADIO_CLASSES: &str = "\
+    appearance-none \
+";
+
+const MOOD_LABEL_CLASSES: &str = "\
+    inline-block \
+    w-36 \
+    py-1 \
+    font-bold \
+    text-center \
+    \
+    bg-slate-300 \
+    hover:bg-slate-200 \
+    has-[:checked]:hover:bg-slate-200 \
+    has-[:active]:bg-slate-400 \
+    \
+    border \
+    has-[:checked]:bg-slate-400 \
+    has-[:checked]:border-slate-600 \
+    text-slate-700 \
+    \
+    first-of-type:rounded-s-lg \
+    last-of-type:rounded-e-lg \
 ";
 
 const SUGGESTION_DIV_CLASSES: &str = "\
     bg-slate-800 \
     text-slate-100 \
     \
-    h-[36rem] \
-    w-full \
-    lg:max-w-7xl \
+    min-h-40 \
     p-4 \
     rounded-lg \
     shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.3)] \
@@ -166,7 +220,7 @@ pub fn App() -> impl IntoView {
                     <RoutingProgress is_routing max_time=Duration::from_millis(250)/>
                 </div>
                 <nav class=NAV_CLASSES>
-                    <h1 class=H1_CLASSES>"tears"</h1>
+                    <h1 class=H1_CLASSES>"💧 tears"</h1>
                     <div class=NAV_SPACER_CLASSES />
                     <A
                         href="https://github.com/azriel91/tears"
@@ -199,23 +253,20 @@ fn HomePage() -> impl IntoView {
     let suggestions = suggestions_map();
 
     let trust = RwSignal::new(None::<Trust>);
-
-    let mood = RwSignal::new(Mood::_04_Unsettled);
-
+    let mood = RwSignal::new(None::<Mood>);
     let suggestion = Signal::derive(move || {
         let trust = trust.get();
         let mood = mood.get();
 
         trust
-            .and_then(|trust| suggestions.get(&(trust, mood)))
+            .zip(mood)
+            .and_then(|(trust, mood)| suggestions.get(&(trust, mood)))
             .cloned()
     });
 
     view! {
         <div class=HOMEPAGE_CLASSES>
-            <TrustInput trust />
-            <MoodInput mood />
-
+            <Inputs trust mood />
             <SuggestionDiv suggestion />
         </div>
     }
@@ -367,12 +418,22 @@ fn suggestions_map() -> HashMap<(Trust, Mood), Suggestion> {
 }
 
 #[component]
+fn Inputs(trust: RwSignal<Option<Trust>>, mood: RwSignal<Option<Mood>>) -> impl IntoView {
+    view! {
+        <div class=INPUTS_DIV_CLASSES>
+            <TrustInput trust />
+            <MoodInput mood />
+        </div>
+    }
+}
+
+#[component]
 fn TrustInput(trust: RwSignal<Option<Trust>>) -> impl IntoView {
     let trust_on_input =
         move |ev| *trust.write() = Trust::from_str(event_target_value(&ev).as_str()).ok();
 
     view! {
-        <div>
+        <div class=INPUT_PANEL_CLASSES>
             <p class=FIELD_CLASSES>
                 <span class=FIELD_NAME_CLASSES>"Trust"</span>
                 <span class=FIELD_DESC_CLASSES>"Whether the person trusts you."</span>
@@ -387,7 +448,7 @@ fn TrustInput(trust: RwSignal<Option<Trust>>) -> impl IntoView {
                             on:input=trust_on_input
                             prop:value=Trust::Absent.to_string()
                         />
-                        <span class=TRUST_LEVEL_CLASSES>{Trust::Absent.to_string()}</span>
+                        <span class=RADIO_NAME_CLASSES>{Trust::Absent.to_string()}</span>
                         <span class=DESCRIPTION_CLASSES>"The person has not initiated a conversation with me recently."</span>
                     </label>
                 </li>
@@ -400,7 +461,7 @@ fn TrustInput(trust: RwSignal<Option<Trust>>) -> impl IntoView {
                             on:input=trust_on_input
                             prop:value=Trust::Present.to_string()
                         />
-                        <span class=TRUST_LEVEL_CLASSES>{Trust::Present.to_string()}</span>
+                        <span class=RADIO_NAME_CLASSES>{Trust::Present.to_string()}</span>
                         <span class=DESCRIPTION_CLASSES>"The person has initiated a conversation with me recently, with no obligation."</span>
                     </label>
                 </li>
@@ -410,41 +471,61 @@ fn TrustInput(trust: RwSignal<Option<Trust>>) -> impl IntoView {
 }
 
 #[component]
-fn MoodInput(mood: RwSignal<Mood>) -> impl IntoView {
-    let mood_on_input = move |ev| {
-        *mood.write() = event_target_value(&ev)
-            .parse::<u8>()
-            .map_err(|_| ())
-            .and_then(Mood::try_from)
-            .unwrap_or(Mood::_04_Unsettled)
-    };
+fn MoodInput(mood: RwSignal<Option<Mood>>) -> impl IntoView {
+    let mood_on_input =
+        move |ev| *mood.write() = Mood::from_str(event_target_value(&ev).as_str()).ok();
 
     view! {
-        <div>
+        <div class=INPUT_PANEL_CLASSES>
             <p class=FIELD_CLASSES>
                 <span class=FIELD_NAME_CLASSES>"Mood"</span>
                 <span class=FIELD_DESC_CLASSES>"How the person feels."</span>
             </p>
-            <input
-                type="range"
-                min="1"
-                max="6"
-                class=MOOD_RANGE_CLASSES
-                on:input=mood_on_input
-                prop:value=move || mood.get().rank()
-            />
+            <div class=MOOD_WRAPPER_CLASSES>
+                {
+                    Mood::iter()
+                        .map(|mood| {
+                            let rank = mood.rank();
+                            let mood_radio_id = format!("mood_radio_{mood}");
+
+                            view! {
+                                <label
+                                    for=mood_radio_id.clone()
+                                    class=MOOD_LABEL_CLASSES
+                                >
+                                    <input
+                                        type="radio"
+                                        class=MOOD_RADIO_CLASSES
+                                        name="mood_radio"
+                                        id=mood_radio_id.clone()
+                                        on:input=mood_on_input
+                                        prop:value=move || mood.to_string()
+                                    />
+                                    <span>
+                                        {rank.to_string()}
+                                        <br />
+                                        {mood.to_string()}
+                                    </span>
+                                </label>
+                            }
+                        })
+                        .collect_view()
+                }
+            </div>
             { move || {
                 let mood = mood.get();
-                let rank = mood.rank();
-
-                view! {
-                    <p class=MOOD_RANGE_DESC_CLASSES>{format!("{rank}: {mood}")}</p>
-                    <p class=DESCRIPTION_CLASSES>
-                        <span class=DESCRIPTION_LABEL_CLASSES>"Symptoms: "</span>
-                        {mood.symptoms()}
-                    </p>
-                    <p class=DESCRIPTION_CLASSES>{mood.summary()}</p>
-                    <p class=DESCRIPTION_CLASSES>{mood.description()}</p>
+                match mood {
+                    Some(mood) => {
+                        Either::Left(view! {
+                            <p class=DESCRIPTION_CLASSES>
+                                <span class=DESCRIPTION_LABEL_CLASSES>"Symptoms: "</span>
+                                {mood.symptoms()}
+                            </p>
+                            <p class=DESCRIPTION_CLASSES>{mood.summary()}</p>
+                            <p class=DESCRIPTION_CLASSES>{mood.description()}</p>
+                        })
+                    }
+                    None => Either::Right(view! {})
                 }
             }}
         </div>
@@ -480,7 +561,7 @@ fn SuggestionDiv(suggestion: Signal<Option<Suggestion>>) -> impl IntoView {
                                     }
                                     key=string_hash
                                     children=|line: String| view! { <p class=DESCRIPTION_CLASSES>{line.to_string()}</p> }
-                                    />
+                                />
                             </div>
                         })
                     }
