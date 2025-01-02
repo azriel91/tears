@@ -113,12 +113,19 @@ const FIELD_CLASSES: &str = "\
 ";
 
 const FIELD_NAME_CLASSES: &str = "\
-    pr-4 \
+    pr-2 \
     font-bold \
     text-3xl \
 ";
 
 const FIELD_DESC_CLASSES: &str = "\
+    italic \
+    text-slate-200 \
+";
+
+const FIELD_HINT_CLASSES: &str = "\
+    italic \
+    text-slate-300 \
 ";
 
 const DESCRIPTION_LABEL_CLASSES: &str = "\
@@ -146,6 +153,11 @@ const RADIO_INPUT_CLASSES: &str = "\
     appearance-none \
     focus-visible:outline-none \
     checked:before:content-['🔵']
+";
+
+const RADIO_CLEAR_CLASSES: &str = "\
+    py-4 \
+    text-slate-300 \
 ";
 
 const RADIO_LABEL_CLASSES: &str = "\
@@ -422,18 +434,19 @@ fn Inputs(trust: RwSignal<Option<Trust>>, mood: RwSignal<Option<Mood>>) -> impl 
 fn TrustInput(trust: RwSignal<Option<Trust>>) -> impl IntoView {
     let trust_on_input =
         move |ev| *trust.write() = Trust::from_str(event_target_value(&ev).as_str()).ok();
+    let trust_clear = move |_| *trust.write() = None;
 
     view! {
         <div class=INPUT_PANEL_CLASSES>
             <p class=FIELD_CLASSES>
                 <span class=FIELD_NAME_CLASSES>"Trust"</span>
-                <span class=FIELD_DESC_CLASSES>"Whether the person trusts you."</span>
+                <span class=FIELD_DESC_CLASSES>"- whether the person trusts you"</span>
             </p>
             <div class=RADIO_WRAPPER_CLASSES>
                 {
                     Trust::iter()
-                        .map(|trust| {
-                            let trust_radio_id = format!("trust_radio_{trust}");
+                        .map(|trust_variant| {
+                            let trust_radio_id = format!("trust_radio_{trust_variant}");
 
                             view! {
                                 <label
@@ -446,10 +459,15 @@ fn TrustInput(trust: RwSignal<Option<Trust>>) -> impl IntoView {
                                         name="trust_radio"
                                         id=trust_radio_id.clone()
                                         on:input=trust_on_input
-                                        prop:value=move || trust.to_string()
+                                        prop:value=move || trust_variant.to_string()
+                                        prop:checked=move || {
+                                            trust.get()
+                                                .map(|trust| trust == trust_variant)
+                                                .unwrap_or(false)
+                                        }
                                     />
                                     <br />
-                                    <span>{trust.to_string()}</span>
+                                    <span>{trust_variant.to_string()}</span>
                                 </label>
                             }
                         })
@@ -461,6 +479,10 @@ fn TrustInput(trust: RwSignal<Option<Trust>>) -> impl IntoView {
                 match trust {
                     Some(trust) => {
                         Either::Left(view! {
+                            <div class=RADIO_CLEAR_CLASSES>
+                                <button on:click=trust_clear>"✖️ clear"</button>
+                            </div>
+
                             <p class=DESCRIPTION_CLASSES>
                                 <span class=DESCRIPTION_LABEL_CLASSES>"Indicators:"</span>
                                 <br />
@@ -468,7 +490,12 @@ fn TrustInput(trust: RwSignal<Option<Trust>>) -> impl IntoView {
                             </p>
                         })
                     }
-                    None => Either::Right(view! {})
+                    None => Either::Right(view! {
+                        <p class=FIELD_HINT_CLASSES>
+                            "select a value"
+                        </p>
+                        <p class=DESCRIPTION_CLASSES><br /></p>
+                    })
                 }
             }}
         </div>
@@ -479,19 +506,20 @@ fn TrustInput(trust: RwSignal<Option<Trust>>) -> impl IntoView {
 fn MoodInput(mood: RwSignal<Option<Mood>>) -> impl IntoView {
     let mood_on_input =
         move |ev| *mood.write() = Mood::from_str(event_target_value(&ev).as_str()).ok();
+    let mood_clear = move |_| *mood.write() = None;
 
     view! {
         <div class=INPUT_PANEL_CLASSES>
             <p class=FIELD_CLASSES>
                 <span class=FIELD_NAME_CLASSES>"Mood"</span>
-                <span class=FIELD_DESC_CLASSES>"How the person feels."</span>
+                <span class=FIELD_DESC_CLASSES>"- how the person feels"</span>
             </p>
             <div class=RADIO_WRAPPER_CLASSES>
                 {
                     Mood::iter()
-                        .map(|mood| {
-                            let rank = mood.rank();
-                            let mood_radio_id = format!("mood_radio_{mood}");
+                        .map(|mood_variant| {
+                            let rank = mood_variant.rank();
+                            let mood_radio_id = format!("mood_radio_{mood_variant}");
 
                             view! {
                                 <label
@@ -504,13 +532,18 @@ fn MoodInput(mood: RwSignal<Option<Mood>>) -> impl IntoView {
                                         name="mood_radio"
                                         id=mood_radio_id.clone()
                                         on:input=mood_on_input
-                                        prop:value=move || mood.to_string()
+                                        prop:value=move || mood_variant.to_string()
+                                        prop:checked=move || {
+                                            mood.get()
+                                                .map(|mood| mood == mood_variant)
+                                                .unwrap_or(false)
+                                        }
                                     />
                                     <br />
                                     <span>
                                         {rank.to_string()}
                                         <br />
-                                        {mood.to_string()}
+                                        {mood_variant.to_string()}
                                     </span>
                                 </label>
                             }
@@ -523,6 +556,10 @@ fn MoodInput(mood: RwSignal<Option<Mood>>) -> impl IntoView {
                 match mood {
                     Some(mood) => {
                         Either::Left(view! {
+                            <div class=RADIO_CLEAR_CLASSES>
+                                <button on:click=mood_clear>"✖️ clear"</button>
+                            </div>
+
                             <p class=DESCRIPTION_CLASSES>
                                 <span class=DESCRIPTION_LABEL_CLASSES>"Symptoms:"</span>
                                 <br />
@@ -536,7 +573,13 @@ fn MoodInput(mood: RwSignal<Option<Mood>>) -> impl IntoView {
                             <p class=DESCRIPTION_CLASSES>{mood.description()}</p>
                         })
                     }
-                    None => Either::Right(view! {})
+                    None => Either::Right(view! {
+                        <p class=FIELD_HINT_CLASSES>
+                            "select a value"
+                        </p>
+                        <p class=DESCRIPTION_CLASSES><br /></p>
+                        <p class=DESCRIPTION_CLASSES><br /></p>
+                    })
                 }
             }}
         </div>
