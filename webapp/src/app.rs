@@ -155,6 +155,7 @@ const MOOD_WRAPPER_CLASSES: &str = "\
 
 const MOOD_RADIO_CLASSES: &str = "\
     appearance-none \
+    focus-visible:outline-none \
 ";
 
 const MOOD_LABEL_CLASSES: &str = "\
