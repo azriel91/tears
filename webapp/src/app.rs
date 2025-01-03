@@ -342,8 +342,19 @@ fn Disclaimer() -> impl IntoView {
     let disclaimer_visibility = RwSignal::new(true);
     let disclaimer_set_visible = move |_| *disclaimer_visibility.write() = true;
     let disclaimer_set_invisible = move |_| *disclaimer_visibility.write() = false;
+
+    let disclaimer_link_classes = move || {
+        let disclaimer_is_invisible = disclaimer_visibility.get() == false;
+        if disclaimer_is_invisible {
+            LINK_CLASSES
+        } else {
+            "hidden"
+        }
+    };
+
     let disclaimer_message_classes = move || {
-        if disclaimer_visibility.get() == true {
+        let disclaimer_is_visible = disclaimer_visibility.get() == true;
+        if disclaimer_is_visible {
             DISCLAIMER_MESSAGE_CLASSES
         } else {
             "hidden"
@@ -353,7 +364,7 @@ fn Disclaimer() -> impl IntoView {
     view! {
         <div>
             <button
-                class=LINK_CLASSES
+                class=disclaimer_link_classes
                 on:click=disclaimer_set_visible
             >
                 "ℹ️ disclaimer"
