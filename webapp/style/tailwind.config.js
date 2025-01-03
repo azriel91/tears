@@ -8,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       backgroundImage: {
-        'cross': "url('/cross.svg')",
+        'cross': "url('cross.svg')",
       }
     },
   },
