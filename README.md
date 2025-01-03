@@ -4,6 +4,8 @@
 
 `tears` helps you consider what to do (and not do) for someone who is overwhelmed.
 
+Site: <https://azriel.im/tears/>
+
 
 ## Development
 
@@ -32,7 +34,7 @@
 
 1. [x] Client side static web application.
 2. [x] Initial suggestions.
-3. [ ] Better UI.
+3. [x] Better UI.
 4. [ ] Character drawings.
 
 
