@@ -344,7 +344,7 @@ fn Disclaimer() -> impl IntoView {
     let disclaimer_set_invisible = move |_| *disclaimer_visibility.write() = false;
 
     let disclaimer_link_classes = move || {
-        let disclaimer_is_invisible = disclaimer_visibility.get() == false;
+        let disclaimer_is_invisible = !disclaimer_visibility.get();
         if disclaimer_is_invisible {
             LINK_CLASSES
         } else {
@@ -353,7 +353,7 @@ fn Disclaimer() -> impl IntoView {
     };
 
     let disclaimer_message_classes = move || {
-        let disclaimer_is_visible = disclaimer_visibility.get() == true;
+        let disclaimer_is_visible = disclaimer_visibility.get();
         if disclaimer_is_visible {
             DISCLAIMER_MESSAGE_CLASSES
         } else {
