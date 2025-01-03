@@ -217,8 +217,19 @@ const RADIO_INPUT_CLASSES: &str = "\
 ";
 
 const RADIO_CLEAR_CLASSES: &str = "\
-    py-4 \
+    py-0 \
+    p-2 \
+    leading-none \
     text-slate-300 \
+    \
+    outline-none \
+    rounded-lg \
+    ring-offset-4 \
+    ring-offset-slate-900 \
+    focus:ring-2 \
+    active:ring-2 \
+    focus:ring-blue-500 \
+    active:ring-blue-500 \
 ";
 
 const RADIO_LABEL_CLASSES: &str = "\
@@ -608,9 +619,13 @@ fn TrustInput(trust: RwSignal<Option<Trust>>) -> impl IntoView {
                 match trust {
                     Some(trust) => {
                         Either::Left(view! {
-                            <div class=RADIO_CLEAR_CLASSES>
-                                <button on:click=trust_clear>"✖️ clear"</button>
-                            </div>
+                            <button
+                                class=RADIO_CLEAR_CLASSES
+                                on:click=trust_clear
+                            >
+                                <span class=BUTTON_CROSS_ICON_CLASSES />
+                                "clear"
+                            </button>
 
                             <p class=DESCRIPTION_CLASSES>
                                 <span class=DESCRIPTION_LABEL_CLASSES>"Indicators:"</span>
@@ -685,9 +700,13 @@ fn MoodInput(mood: RwSignal<Option<Mood>>) -> impl IntoView {
                 match mood {
                     Some(mood) => {
                         Either::Left(view! {
-                            <div class=RADIO_CLEAR_CLASSES>
-                                <button on:click=mood_clear>"✖️ clear"</button>
-                            </div>
+                            <button
+                                class=RADIO_CLEAR_CLASSES
+                                on:click=mood_clear
+                            >
+                                <span class=BUTTON_CROSS_ICON_CLASSES />
+                                "clear"
+                            </button>
 
                             <p class=DESCRIPTION_CLASSES>
                                 <span class=DESCRIPTION_LABEL_CLASSES>"Symptoms:"</span>
