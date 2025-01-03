@@ -6,14 +6,14 @@ use leptos::{
     hydration::{AutoReload, HydrationScripts},
     prelude::{
         event_target_value, signal, ClassAttribute, CollectView, ElementChild, Get,
-        GlobalAttributes, IntoView, LeptosOptions, OnAttribute, PropAttribute, RwSignal, Signal,
-        Write,
+        GlobalAttributes, GlobalOnAttributes, IntoView, LeptosOptions, OnAttribute, PropAttribute,
+        RwSignal, Signal, Write,
     },
     view,
 };
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
 use leptos_router::{
-    components::{Route, Router, Routes, RoutingProgress, A},
+    components::{Route, Router, Routes, RoutingProgress},
     StaticSegment,
 };
 use tears::{Mood, Suggestion, Trust};
@@ -52,6 +52,14 @@ const PAGE_CLASSES: &str = "\
     leading-relaxed \
 ";
 
+const PAGE_SPACER_CLASSES: &str = "\
+    flex-1
+";
+const PAGE_FOOTER_CLASSES: &str = "\
+    flex \
+    justify-end \
+";
+
 const H1_CLASSES: &str = "\
     font-bold \
     font-mono \
@@ -81,6 +89,22 @@ const MAIN_CLASSES: &str = "\
     *:grow \
 ";
 
+const DISCLAIMER_MESSAGE_CLASSES: &str = "\
+    fixed \
+    bottom-8 \
+    right-8 \
+    \
+    bg-slate-700 \
+    text-slate-100 \
+    text-justify \
+    \
+    p-8 \
+    border-2 \
+    border-slate-800 \
+    rounded-lg \
+    max-w-[768px] \
+";
+
 const HOMEPAGE_CLASSES: &str = "\
     gap-4 \
     flex \
@@ -89,6 +113,45 @@ const HOMEPAGE_CLASSES: &str = "\
     flex-wrap \
     *:grow \
     *:flex-auto \
+";
+
+const LINK_CLASSES: &str = "\
+    text-slate-300 \
+    hover:text-slate-100 \
+    \
+    focus-visible:outline-none \
+    rounded-lg \
+    ring-offset-4 \
+    ring-offset-slate-950 \
+    focus:ring-2 \
+    active:ring-2 \
+    focus:ring-blue-500 \
+    active:ring-blue-500 \
+";
+
+const BUTTON_CROSS_CLASSES: &str = "\
+    text-slate-300 \
+    float-right \
+    \
+    outline-none \
+    rounded-lg \
+    ring-offset-4 \
+    ring-offset-slate-700 \
+    focus:ring-2 \
+    active:ring-2 \
+    focus:ring-blue-500 \
+    active:ring-blue-500 \
+";
+
+const BUTTON_CROSS_ICON_CLASSES: &str = "\
+    inline-block \
+    w-4 \
+    h-4 \
+    mr-2 \
+    bg-cross \
+    bg-no-repeat \
+    bg-center \
+    bg-[length:16px_16px] \
 ";
 
 const INPUTS_DIV_CLASSES: &str = "\
@@ -128,7 +191,7 @@ const FIELD_HINT_CLASSES: &str = "\
 
 const DESCRIPTION_LABEL_CLASSES: &str = "\
     font-bold \
-    py-3 \
+    pb-3 \
 ";
 
 const DESCRIPTION_CLASSES: &str = "\
@@ -225,23 +288,29 @@ pub fn App() -> impl IntoView {
                     <a
                         href="#main"
                         onclick=r#"document.querySelector("input").focus();"#
+                        class=LINK_CLASSES
                     >"Skip to content"</a>
                 </div>
                 <nav class=NAV_CLASSES>
                     <h1 class=H1_CLASSES>"💧 tears"</h1>
                     <div class=NAV_SPACER_CLASSES />
-                    <A
+                    <a
                         href="https://github.com/azriel91/tears"
                         target="_blank"
+                        class=LINK_CLASSES
                     >
                         "🐙 github"
-                    </A>
+                    </a>
                 </nav>
                 <main id="main" class=MAIN_CLASSES>
                     <Routes fallback=RouterFallback>
                         <Route path=StaticSegment(site_prefix) view=HomePage />
                     </Routes>
                 </main>
+                <div class=PAGE_SPACER_CLASSES />
+                <footer class=PAGE_FOOTER_CLASSES>
+                    <Disclaimer />
+                </footer>
             </div>
         </Router>
     }
@@ -254,6 +323,59 @@ fn RouterFallback() -> impl IntoView {
 
     view! {
         <p>"Path not found: " {pathname}</p>
+    }
+}
+
+#[component]
+fn Disclaimer() -> impl IntoView {
+    let disclaimer_visibility = RwSignal::new(true);
+    let disclaimer_set_visible = move |_| *disclaimer_visibility.write() = true;
+    let disclaimer_set_invisible = move |_| *disclaimer_visibility.write() = false;
+    let disclaimer_message_classes = move || {
+        if disclaimer_visibility.get() == true {
+            DISCLAIMER_MESSAGE_CLASSES
+        } else {
+            "hidden"
+        }
+    };
+
+    view! {
+        <div>
+            <button
+                class=LINK_CLASSES
+                on:click=disclaimer_set_visible
+            >
+                "ℹ️ disclaimer"
+            </button>
+
+            <div class=disclaimer_message_classes>
+                <button
+                    class=BUTTON_CROSS_CLASSES
+                    on:click=disclaimer_set_invisible
+                >
+                    <span class=BUTTON_CROSS_ICON_CLASSES />
+                    "close"
+                </button>
+
+                <p class=DESCRIPTION_LABEL_CLASSES>"ℹ️ disclaimer"</p>
+
+                <p class=DESCRIPTION_CLASSES>
+                    "These are words from personal experience, not advice from \
+                    a qualified professional."
+                </p>
+                <p class=DESCRIPTION_CLASSES>
+                    "The descriptions are intentionally short so they are easy \
+                    to read, and each example is only one possibility out of \
+                    innumerable unique situations."
+                </p>
+                <p class=DESCRIPTION_CLASSES>
+                    "These are written for people who are eager to help, to \
+                    show that practical steps may not necessarily be \
+                    beneficial -- the person may not have the capacity to \
+                    receive it, or if they are, it may not be from you."
+                </p>
+            </div>
+        </div>
     }
 }
 

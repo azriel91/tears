@@ -8,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       backgroundImage: {
-        'arrow': "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='10'><path d='M 0 0 L 8 5 L 0 10 Z' fill='black' stroke='black' /></svg>\")",
+        'cross': "url('/cross.svg')",
       }
     },
   },
