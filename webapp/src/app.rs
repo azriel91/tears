@@ -28,6 +28,10 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
                 <AutoReload options=options.clone() />
                 <HydrationScripts options />
                 <MetaTags />
+
+                // injects a stylesheet into the document <head>
+                // id=leptos means cargo-leptos will hot-reload this stylesheet
+                <Stylesheet id="leptos" href="/pkg/tears.css"/>
             </head>
             <body>
                 <App />
@@ -282,10 +286,6 @@ pub fn App() -> impl IntoView {
     let (is_routing, set_is_routing) = signal(false);
 
     view! {
-        // injects a stylesheet into the document <head>
-        // id=leptos means cargo-leptos will hot-reload this stylesheet
-        <Stylesheet id="leptos" href="/pkg/tears.css"/>
-
         // sets the document title
         <Title text="tears • azriel.im"/>
 
